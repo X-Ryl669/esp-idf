@@ -103,7 +103,9 @@ typedef struct {
 typedef enum {
     TCPIP_ADAPTER_IF_STA = 0,     /**< ESP32 station interface */
     TCPIP_ADAPTER_IF_AP,          /**< ESP32 soft-AP interface */
+#ifdef _DECL_ethernet
     TCPIP_ADAPTER_IF_ETH,         /**< ESP32 ethernet interface */
+#endif
     TCPIP_ADAPTER_IF_MAX
 } tcpip_adapter_if_t;
 
@@ -196,6 +198,7 @@ typedef struct tcpip_adatper_ip_lost_timer_s {
  */
 void tcpip_adapter_init(void);
 
+#ifdef _DECL_ethernet
 /**
  * @brief  Start the ethernet interface with specific MAC and IP
  *
@@ -207,6 +210,7 @@ void tcpip_adapter_init(void);
  *         ESP_ERR_NO_MEM
  */
 esp_err_t tcpip_adapter_eth_start(uint8_t *mac, tcpip_adapter_ip_info_t *ip_info);
+#endif
 
 /**
  * @brief  Start the Wi-Fi station interface with specific MAC and IP
@@ -516,6 +520,7 @@ esp_err_t tcpip_adapter_dhcpc_start(tcpip_adapter_if_t tcpip_if);
  */
 esp_err_t tcpip_adapter_dhcpc_stop(tcpip_adapter_if_t tcpip_if);
 
+#ifdef _DECL_ethernet
 /**
  * @brief  Get data from ethernet interface
  *
@@ -528,6 +533,7 @@ esp_err_t tcpip_adapter_dhcpc_stop(tcpip_adapter_if_t tcpip_if);
  * @return ESP_OK
  */
 esp_err_t tcpip_adapter_eth_input(void *buffer, uint16_t len, void *eb);
+#endif
 
 /**
  * @brief  Get data from station interface

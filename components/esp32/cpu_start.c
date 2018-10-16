@@ -64,7 +64,9 @@
 #include "esp_core_dump.h"
 #include "esp_app_trace.h"
 #include "esp_dbg_stubs.h"
+#ifdef _DECL_bootloader_support
 #include "esp_efuse.h"
+#endif
 #include "esp_spiram.h"
 #include "esp_clk_internal.h"
 #include "esp_timer.h"

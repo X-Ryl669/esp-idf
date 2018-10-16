@@ -31,9 +31,18 @@
 #include "esp_spi_flash.h"
 #include "esp_log.h"
 #include "esp_clk.h"
+#ifdef _DECL_bootloader_support
 #include "esp_flash_partitions.h"
+#else
+  #pragma message "Not using bootloader_support component disable SPI flash write operations"
+#endif
+#ifdef _DECL_app_update
 #include "esp_ota_ops.h"
+#else
+  #pragma message "Not using app_update component disable OTA operations"
+#endif
 #include "cache_utils.h"
+
 
 /* bytes erased by SPIEraseBlock() ROM function */
 #define BLOCK_ERASE_SIZE 65536
@@ -115,6 +124,7 @@ static const spi_flash_guard_funcs_t *s_flash_guard_ops;
 
 static __attribute__((unused)) bool is_safe_write_address(size_t addr, size_t size)
 {
+#if defined(_DECL_bootloader_support) && defined(_DECL_app_update)
     bool result = true;
     if (addr <= ESP_PARTITION_TABLE_OFFSET + ESP_PARTITION_TABLE_MAX_LEN) {
         UNSAFE_WRITE_ADDRESS;
@@ -127,8 +137,10 @@ static __attribute__((unused)) bool is_safe_write_address(size_t addr, size_t si
     if (addr < p->address && addr + size > p->address) {
         UNSAFE_WRITE_ADDRESS;
     }
-
     return result;
+#else
+    return false;
+#endif
 }
 
 

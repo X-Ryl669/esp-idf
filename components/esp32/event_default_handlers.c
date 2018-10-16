@@ -22,7 +22,9 @@
 #include "esp_event.h"
 #include "esp_event_loop.h"
 #include "esp_task.h"
+#ifdef _DECL_ethernet
 #include "esp_eth.h"
+#endif
 #include "esp_system.h"
 
 #include "rom/ets_sys.h"
@@ -57,11 +59,13 @@ static esp_err_t system_event_sta_disconnected_handle_default(system_event_t *ev
 static esp_err_t system_event_sta_got_ip_default(system_event_t *event);
 static esp_err_t system_event_sta_lost_ip_default(system_event_t *event);
 
+#ifdef _DECL_ethernet
 static esp_err_t system_event_eth_start_handle_default(system_event_t *event);
 static esp_err_t system_event_eth_stop_handle_default(system_event_t *event);
 static esp_err_t system_event_eth_connected_handle_default(system_event_t *event);
 static esp_err_t system_event_eth_disconnected_handle_default(system_event_t *event);
 static esp_err_t system_event_eth_got_ip_default(system_event_t *event);
+#endif
 
 /* Default event handler functions
 
@@ -69,6 +73,7 @@ static esp_err_t system_event_eth_got_ip_default(system_event_t *event);
 */
 static system_event_handler_t default_event_handlers[SYSTEM_EVENT_MAX] = { 0 };
 
+#ifdef _DECL_ethernet
 esp_err_t system_event_eth_start_handle_default(system_event_t *event)
 {
     tcpip_adapter_ip_info_t eth_ip;
@@ -134,6 +139,7 @@ static esp_err_t system_event_eth_got_ip_default(system_event_t *event)
 
     return ESP_OK;
 }
+#endif
 
 static esp_err_t system_event_sta_got_ip_default(system_event_t *event)
 {
@@ -358,6 +364,7 @@ static esp_err_t esp_system_event_debug(system_event_t *event)
                  IP6_ADDR_BLOCK8(addr));
         break;
     }
+#ifdef _DECL_ethernet
     case SYSTEM_EVENT_ETH_START: {
         ESP_LOGD(TAG, "SYSTEM_EVENT_ETH_START");
         break;
@@ -378,7 +385,7 @@ static esp_err_t esp_system_event_debug(system_event_t *event)
         ESP_LOGD(TAG, "SYSTEM_EVENT_ETH_GOT_IP");
         break;
     }
-
+#endif
     default: {
         ESP_LOGW(TAG, "unexpected system event %d!", event->event_id);
         break;
@@ -423,6 +430,7 @@ void esp_event_set_default_wifi_handlers()
      esp_register_shutdown_handler((shutdown_handler_t)esp_wifi_stop);
 }
 
+#ifdef _DECL_ethernet
 void esp_event_set_default_eth_handlers()
 {
      default_event_handlers[SYSTEM_EVENT_ETH_START]           = system_event_eth_start_handle_default;
@@ -431,3 +439,4 @@ void esp_event_set_default_eth_handlers()
      default_event_handlers[SYSTEM_EVENT_ETH_DISCONNECTED]    = system_event_eth_disconnected_handle_default;
      default_event_handlers[SYSTEM_EVENT_ETH_GOT_IP]          = system_event_eth_got_ip_default;
 }
+#endif

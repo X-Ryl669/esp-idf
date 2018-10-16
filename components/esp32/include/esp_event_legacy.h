@@ -47,11 +47,13 @@ typedef enum {
     SYSTEM_EVENT_AP_STAIPASSIGNED,         /**< ESP32 soft-AP assign an IP to a connected station */
     SYSTEM_EVENT_AP_PROBEREQRECVED,        /**< Receive probe request packet in soft-AP interface */
     SYSTEM_EVENT_GOT_IP6,                  /**< ESP32 station or ap or ethernet interface v6IP addr is preferred */
+#if _DECL_ethernet
     SYSTEM_EVENT_ETH_START,                /**< ESP32 ethernet start */
     SYSTEM_EVENT_ETH_STOP,                 /**< ESP32 ethernet stop */
     SYSTEM_EVENT_ETH_CONNECTED,            /**< ESP32 ethernet phy link up */
     SYSTEM_EVENT_ETH_DISCONNECTED,         /**< ESP32 ethernet phy link down */
     SYSTEM_EVENT_ETH_GOT_IP,               /**< ESP32 ethernet got IP from connected AP */
+#endif
     SYSTEM_EVENT_MAX
 } system_event_id_t;
 
