@@ -24,7 +24,12 @@
 #include "freertos/semphr.h"
 #include "freertos/xtensa_api.h"
 #include "freertos/task.h"
+
+#ifndef _DECL_esp_ringbuf
+#error "Missing component esp_ringbuf to build this component."
+#else
 #include "freertos/ringbuf.h"
+#endif
 #include "soc/dport_reg.h"
 #include "soc/uart_struct.h"
 #include "driver/uart.h"

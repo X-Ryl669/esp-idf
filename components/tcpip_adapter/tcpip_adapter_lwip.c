@@ -190,7 +190,11 @@ static esp_err_t tcpip_adapter_start(tcpip_adapter_if_t tcpip_if, uint8_t *mac, 
         assert(netif_init != NULL);
         netif_add(esp_netif[tcpip_if], &ip_info->ip, &ip_info->netmask, &ip_info->gw, NULL, netif_init, tcpip_input);
 #if ESP_GRATUITOUS_ARP
-        if (tcpip_if == TCPIP_ADAPTER_IF_STA || tcpip_if == TCPIP_ADAPTER_IF_ETH) {
+        if (tcpip_if == TCPIP_ADAPTER_IF_STA
+#if _DECL_ethernet
+         || tcpip_if == TCPIP_ADAPTER_IF_ETH
+#endif
+           ) {
             netif_set_garp_flag(esp_netif[tcpip_if]);
         }
 #endif
