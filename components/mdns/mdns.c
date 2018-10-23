@@ -771,11 +771,13 @@ static uint16_t _mdns_append_question(uint8_t * packet, uint16_t * index, mdns_o
  */
 static tcpip_adapter_if_t _mdns_get_other_if (tcpip_adapter_if_t tcpip_if)
 {
+#ifdef _DECL_ethernet
     if (tcpip_if == TCPIP_ADAPTER_IF_STA) {
         return TCPIP_ADAPTER_IF_ETH;
     } else if (tcpip_if == TCPIP_ADAPTER_IF_ETH) {
         return TCPIP_ADAPTER_IF_STA;
     }
+#endif
     return TCPIP_ADAPTER_IF_MAX;
 }
 
@@ -3005,6 +3007,7 @@ void _mdns_handle_system_event(system_event_id_t event, tcpip_adapter_if_t inter
         _mdns_enable_pcb(interface, MDNS_IP_PROTOCOL_V6);
         _mdns_announce_pcb(interface, MDNS_IP_PROTOCOL_V4, NULL, 0, true);
         break;
+#ifdef _DECL_ethernet
     case SYSTEM_EVENT_ETH_CONNECTED:
         if (!tcpip_adapter_dhcpc_get_status(TCPIP_ADAPTER_IF_ETH, &dcst)) {
             if (dcst != TCPIP_ADAPTER_DHCP_STARTED) {
@@ -3019,6 +3022,7 @@ void _mdns_handle_system_event(system_event_id_t event, tcpip_adapter_if_t inter
         _mdns_disable_pcb(TCPIP_ADAPTER_IF_ETH, MDNS_IP_PROTOCOL_V4);
         _mdns_disable_pcb(TCPIP_ADAPTER_IF_ETH, MDNS_IP_PROTOCOL_V6);
         break;
+#endif
     default:
         break;
     }
