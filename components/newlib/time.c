@@ -306,6 +306,14 @@ int IRAM_ATTR _gettimeofday_r(struct _reent *r, struct timeval *tv, void *tz)
 #endif // defined( WITH_FRC ) || defined( WITH_RTC )
 }
 
+static void (*time_updated_cb)(void *) = 0;
+static void * time_updated_cb_arg = 0;
+void set_timeupdated_callback(void(*callback)(void*), void * arg) 
+{
+    time_updated_cb = callback;
+    time_updated_cb_arg = arg;
+}
+
 int settimeofday(const struct timeval *tv, const struct timezone *tz)
 {
     (void) tz;
@@ -315,6 +323,7 @@ int settimeofday(const struct timeval *tv, const struct timezone *tz)
         uint64_t now = ((uint64_t) tv->tv_sec) * 1000000LL + tv->tv_usec;
         uint64_t since_boot = get_time_since_boot();
         set_boot_time(now - since_boot);
+	if (time_updated_cb) time_updated_cb(time_updated_cb_arg);
     }
     return 0;
 #else

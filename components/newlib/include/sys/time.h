@@ -77,6 +77,8 @@ int _EXFUN(_gettimeofday, (struct timeval *__p, void *__tz));
 int _EXFUN(gettimeofday, (struct timeval *__restrict __p,
 			  void *__restrict __tz));
 #if __BSD_VISIBLE
+void set_timeupdated_cb(void(*callback)(void*), void* arg);
+
 int _EXFUN(settimeofday, (const struct timeval *, const struct timezone *));
 int _EXFUN(adjtime, (const struct timeval *, struct timeval *));
 #endif
