@@ -45,7 +45,6 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "nvs_flash.h"
-#include "esp_event.h"
 #include "esp_spi_flash.h"
 #include "esp_ipc.h"
 #include "esp_crosscore_int.h"
@@ -64,6 +63,9 @@
 #include "esp_core_dump.h"
 #include "esp_app_trace.h"
 #include "esp_dbg_stubs.h"
+#ifdef _DECL_esp_event
+#include "esp_event.h"
+#endif
 #ifdef _DECL_bootloader_support
 #include "esp_efuse.h"
 #endif

@@ -66,6 +66,9 @@
 #include "esp_err.h"
 #include "esp_wifi_types.h"
 #include "esp_wifi_crypto_types.h"
+#ifndef _DECL_esp_event
+  #error "WIFI component usually needs you to enable esp_event component. You can not use WIFI_INIT_CONFIG_DEFAULT (C code only) without this."
+#endif
 #include "esp_event.h"
 #include "esp_wifi_os_adapter.h"
 
