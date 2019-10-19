@@ -30,6 +30,7 @@
 void bootloader_flash_update_id(void)
 {
     g_rom_flashchip.device_id = bootloader_read_flash_id();
+    bootloader_read_flash_uid();
 }
 
 void IRAM_ATTR bootloader_flash_cs_timing_config(void)

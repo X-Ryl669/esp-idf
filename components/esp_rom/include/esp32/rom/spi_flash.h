@@ -153,6 +153,11 @@ typedef struct {
     uint32_t status_mask;
 } esp_rom_spiflash_chip_t;
 
+typedef union {
+    uint32_t words[2];
+    uint8_t  unique_id[8];
+} esp_rom_spiflash_uid_t;
+
 typedef struct {
     uint8_t  data_length;
     uint8_t  read_cmd0;
@@ -546,6 +551,11 @@ void esp_rom_spiflash_select_qio_pins(uint8_t wp_gpio_num, uint32_t spiconfig);
  *
  */
 extern esp_rom_spiflash_chip_t g_rom_flashchip;
+
+/** @brief Global esp_rom_spiflash_uid_t structure used to store flash unique identifier
+ *
+ */
+extern esp_rom_spiflash_uid_t g_rom_flashuid;
 
 /**
   * @}

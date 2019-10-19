@@ -36,6 +36,7 @@
 #define CMD_RDSR       0x05
 #define CMD_RDSR2      0x35 /* Not all SPI flash uses this command */
 #define CMD_OTPEN      0x3A /* Enable OTP mode, not all SPI flash uses this command */
+#define CMD_RDUID      0x4B
 
 static const char *TAG = "qio_mode";
 
@@ -126,6 +127,13 @@ uint32_t bootloader_read_flash_id(void)
     uint32_t id = execute_flash_command(CMD_RDID, 0, 0, 24);
     id = ((id & 0xff) << 16) | ((id >> 16) & 0xff) | (id & 0xff00);
     return id;
+}
+esp_rom_spiflash_uid_t g_rom_flashuid;
+void bootloader_read_flash_uid()
+{
+    execute_flash_command(CMD_RDUID, 0, 0, 128);
+    g_rom_flashuid.words[0] = SPIFLASH.data_buf[1];
+    g_rom_flashuid.words[1] = SPIFLASH.data_buf[2];
 }
 
 void bootloader_enable_qio_mode(void)

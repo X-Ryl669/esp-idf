@@ -123,6 +123,7 @@ static esp_err_t bootloader_main(void)
     bootloader_common_vddsdio_configure();
     /* Read and keep flash ID, for further use. */
     g_rom_flashchip.device_id = bootloader_read_flash_id();
+    bootloader_read_flash_uid();
     esp_image_header_t fhdr;
     if (bootloader_flash_read(ESP_BOOTLOADER_OFFSET, &fhdr, sizeof(esp_image_header_t), true) != ESP_OK) {
         ESP_LOGE(TAG, "failed to load bootloader header!");

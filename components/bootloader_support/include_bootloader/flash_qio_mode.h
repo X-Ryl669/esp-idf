@@ -32,6 +32,11 @@ void bootloader_enable_qio_mode(void);
  */
 uint32_t bootloader_read_flash_id(void);
 
+/**
+ * @brief Read flash unique ID in g_rom_flashuid by sending 0x4B command
+ */
+void bootloader_read_flash_uid(void);
+
 #ifdef __cplusplus
 }
 #endif
