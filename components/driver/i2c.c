@@ -146,6 +146,7 @@ typedef enum {
     I2C_STATUS_ACK_ERROR, /*!< ack error status for current master command */
     I2C_STATUS_DONE,      /*!< I2C command done */
     I2C_STATUS_TIMEOUT,   /*!< I2C bus status error, and operation timeout */
+    I2C_STATUS_BREAK,      /*!< Break down one command into two or more */
 } i2c_status_t;
 
 typedef struct {
@@ -528,7 +529,8 @@ static void IRAM_ATTR i2c_isr_handler_default(void *arg)
     portBASE_TYPE HPTaskAwoken = pdFALSE;
     portBASE_TYPE HPTaskAwokenCallee = pdFALSE;
     if (p_i2c->mode == I2C_MODE_MASTER) {
-        if (p_i2c->status == I2C_STATUS_WRITE) {
+
+        if (p_i2c->status == I2C_STATUS_WRITE || p_i2c->status == I2C_STATUS_BREAK) {
             i2c_hal_master_handle_tx_event(&(i2c_context[i2c_num].hal), &evt_type);
         } else if (p_i2c->status == I2C_STATUS_READ) {
             i2c_hal_master_handle_rx_event(&(i2c_context[i2c_num].hal), &evt_type);
@@ -1437,6 +1439,18 @@ static void IRAM_ATTR i2c_master_cmd_begin_static(i2c_port_t i2c_num, portBASE_T
             break;
         } else {
             i2c_ll_write_cmd_reg(i2c_context[i2c_num].hal.dev, hw_cmd, p_i2c->cmd_idx);
+
+            /* Check if we just enqueued a STOP which is followed by a start */
+            struct i2c_cmd_link *next_cmd = p_i2c->cmd_link.head->next;
+            if (hw_cmd.op_code == I2C_LL_CMD_STOP && next_cmd &&
+                next_cmd->cmd.hw_cmd.op_code == I2C_LL_CMD_RESTART) {
+                    p_i2c->status = I2C_STATUS_BREAK;
+                    /* Put an END in-between to force the hardware to have a pause between the STOP and the RESTART */
+                    i2c_ll_write_cmd_reg(i2c_context[i2c_num].hal.dev, hw_end_cmd, p_i2c->cmd_idx + 1);
+                    i2c_ll_master_enable_tx_it(i2c_context[i2c_num].hal.dev);
+                    p_i2c->cmd_link.head = next_cmd;
+                    break;
+            }
         }
         p_i2c->cmd_idx++;
         p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
