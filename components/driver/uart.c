@@ -19,7 +19,6 @@
 #include "hal/gpio_hal.h"
 #include "hal/clk_tree_ll.h"
 #include "soc/uart_periph.h"
-#include "soc/rtc_cntl_reg.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include "driver/uart_select.h"
@@ -303,8 +302,7 @@ esp_err_t uart_set_baudrate(uart_port_t uart_num, uint32_t baud_rate)
     uint32_t sclk_freq;
 
     uart_hal_get_sclk(&(uart_context[uart_num].hal), &src_clk);
-    esp_err_t err = uart_get_sclk_freq(src_clk, &sclk_freq);
-    assert(err == ESP_OK);
+    ESP_RETURN_ON_ERROR(uart_get_sclk_freq(src_clk, &sclk_freq), UART_TAG, "Invalid src_clk");
 
     UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
     uart_hal_set_baudrate(&(uart_context[uart_num].hal), baud_rate, sclk_freq);
@@ -320,8 +318,7 @@ esp_err_t uart_get_baudrate(uart_port_t uart_num, uint32_t *baudrate)
     uint32_t sclk_freq;
 
     uart_hal_get_sclk(&(uart_context[uart_num].hal), &src_clk);
-    esp_err_t err = uart_get_sclk_freq(src_clk, &sclk_freq);
-    assert(err == ESP_OK);
+    ESP_RETURN_ON_ERROR(uart_get_sclk_freq(src_clk, &sclk_freq), UART_TAG, "Invalid src_clk");
 
     UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
     uart_hal_get_baudrate(&(uart_context[uart_num].hal), baudrate, sclk_freq);
@@ -747,8 +744,7 @@ esp_err_t uart_param_config(uart_port_t uart_num, const uart_config_t *uart_conf
     }
 #endif
     uint32_t sclk_freq;
-    esp_err_t err = uart_get_sclk_freq(uart_config->source_clk, &sclk_freq);
-    assert(err == ESP_OK);
+    ESP_RETURN_ON_ERROR(uart_get_sclk_freq(uart_config->source_clk, &sclk_freq), UART_TAG, "Invalid src_clk");
 
     UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
     uart_hal_init(&(uart_context[uart_num].hal), uart_num);

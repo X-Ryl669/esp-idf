@@ -82,6 +82,8 @@
 #define SOC_I2S_SUPPORTED           1
 #define SOC_RMT_SUPPORTED           1
 #define SOC_SDM_SUPPORTED           1
+#define SOC_LEDC_SUPPORTED          1
+#define SOC_I2C_SUPPORTED           1
 #define SOC_SUPPORT_COEXISTENCE     1
 #define SOC_AES_SUPPORTED           1
 #define SOC_MPI_SUPPORTED           1
@@ -130,8 +132,11 @@
 #define SOC_BROWNOUT_RESET_SUPPORTED 1
 #endif
 
-/*-------------------------- CACHE CAPS --------------------------------------*/
+
+/*-------------------------- CACHE/MMU CAPS ----------------------------------*/
 #define SOC_SHARED_IDCACHE_SUPPORTED            1   //Shared Cache for both instructions and data
+#define SOC_MMU_LINEAR_ADDRESS_REGION_NUM       5
+
 
 /*-------------------------- CPU CAPS ----------------------------------------*/
 #define SOC_CPU_CORES_NUM               2
@@ -376,9 +381,6 @@
  */
 #define SOC_SDMMC_USE_IOMUX  1
 #define SOC_SDMMC_NUM_SLOTS  2
-
-/*------------------------------ BLE --------------------------------------------*/
-#define SOC_BLE_DONT_UPDATE_OWN_RPA  (1)
 
 /*-------------------------- WI-FI HARDWARE CAPS -------------------------------*/
 #define SOC_WIFI_HW_TSF                 (0)    /*!< Hardware TSF is not supported */

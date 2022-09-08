@@ -99,6 +99,14 @@ config SOC_SDM_SUPPORTED
     bool
     default y
 
+config SOC_LEDC_SUPPORTED
+    bool
+    default y
+
+config SOC_I2C_SUPPORTED
+    bool
+    default y
+
 config SOC_SYSTIMER_SUPPORTED
     bool
     default y
@@ -234,6 +242,10 @@ config SOC_ADC_CALIBRATION_V1_SUPPORTED
 config SOC_BROWNOUT_RESET_SUPPORTED
     bool
     default y
+
+config SOC_MMU_LINEAR_ADDRESS_REGION_NUM
+    int
+    default 6
 
 config SOC_CP_DMA_MAX_BUFFER_SIZE
     int

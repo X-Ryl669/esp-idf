@@ -8,7 +8,7 @@ import sys
 from asyncio.subprocess import Process
 from io import open
 from types import FunctionType
-from typing import Any, Dict, List, Match, Optional, TextIO, Tuple, Union
+from typing import Any, Dict, Generator, List, Match, Optional, TextIO, Tuple, Union
 
 import click
 import yaml
@@ -95,7 +95,7 @@ def red_print(message: str, newline: Optional[str]='\n') -> None:
     color_print(message, ansi_red, newline)
 
 
-def print_hints(*filenames: str) -> None:
+def generate_hints(*filenames: str) -> Generator:
     """Getting output files and printing hints on how to resolve errors based on the output."""
     with open(os.path.join(os.path.dirname(__file__), 'hints.yml'), 'r') as file:
         hints = yaml.safe_load(file)
@@ -109,8 +109,8 @@ def print_hints(*filenames: str) -> None:
             try:
                 if variables_list:
                     for variables in variables_list:
-                        hint_vars = variables['re_variables']
-                        re_vars = variables['hint_variables']
+                        hint_vars = variables['hint_variables']
+                        re_vars = variables['re_variables']
                         regex = hint['re'].format(*re_vars)
                         if re.compile(regex).search(output):
                             try:
@@ -128,14 +128,13 @@ def print_hints(*filenames: str) -> None:
                 sys.exit(1)
             if hint_list:
                 for message in hint_list:
-                    yellow_print('HINT:', message)
+                    yield ' '.join(['HINT:', message])
             elif match:
                 extra_info = ', '.join(match.groups()) if hint.get('match_to_output', '') else ''
                 try:
-                    yellow_print(' '.join(['HINT:', hint['hint'].format(extra_info)]))
-                except KeyError as e:
-                    red_print('Argument {} missing in {}. Check hints.yml file.'.format(e, hint))
-                    sys.exit(1)
+                    yield ' '.join(['HINT:', hint['hint'].format(extra_info)])
+                except KeyError:
+                    raise KeyError("Argument 'hint' missing in {}. Check hints.yml file.".format(hint))
 
 
 def fit_text_in_terminal(out: str) -> str:
@@ -195,7 +194,8 @@ class RunTool:
             return
 
         if stderr_output_file and stdout_output_file:
-            print_hints(stderr_output_file, stdout_output_file)
+            for hint in generate_hints(stderr_output_file, stdout_output_file):
+                yellow_print(hint)
             raise FatalError('{} failed with exit code {}, output of the command is in the {} and {}'.format(self.tool_name, process.returncode,
                              stderr_output_file, stdout_output_file))
 
@@ -222,24 +222,16 @@ class RunTool:
         if p.stderr and p.stdout:  # it only to avoid None type in p.std
             await asyncio.gather(
                 self.read_and_write_stream(p.stderr, stderr_output_file, sys.stderr),
-                self.read_and_write_stream(p.stdout, stdout_output_file))
+                self.read_and_write_stream(p.stdout, stdout_output_file, sys.stdout))
         await p.wait()  # added for avoiding None returncode
         return p, stderr_output_file, stdout_output_file
 
     async def read_and_write_stream(self, input_stream: asyncio.StreamReader, output_filename: str,
-                                    output_stream: TextIO=sys.stdout) -> None:
+                                    output_stream: TextIO) -> None:
         """read the output of the `input_stream` and then write it into `output_filename` and `output_stream`"""
         def delete_ansi_escape(text: str) -> str:
             ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
             return ansi_escape.sub('', text)
-
-        def prepare_for_print(out: bytes) -> str:
-            # errors='ignore' is here because some chips produce some garbage bytes
-            result = out.decode(errors='ignore')
-            if not output_stream.isatty():
-                # delete escape sequence if we printing in environments where ANSI coloring is disabled
-                return delete_ansi_escape(result)
-            return result
 
         def print_progression(output: str) -> None:
             # Print a new line on top of the previous line
@@ -247,20 +239,51 @@ class RunTool:
             print('\r', end='')
             print(fit_text_in_terminal(output.strip('\n\r')), end='', file=output_stream)
 
+        async def read_stream() -> Optional[str]:
+            try:
+                output_b = await input_stream.readline()
+                return output_b.decode(errors='ignore')
+            except (asyncio.LimitOverrunError, asyncio.IncompleteReadError) as e:
+                print(e, file=sys.stderr)
+                return None
+            except AttributeError:
+                return None
+
+        async def read_interactive_stream() -> Optional[str]:
+            buffer = b''
+            while True:
+                output_b = await input_stream.read(1)
+                if not output_b:
+                    return None
+                try:
+                    return (buffer + output_b).decode()
+                except UnicodeDecodeError:
+                    buffer += output_b
+                    if len(buffer) > 4:
+                        # Multi-byte character contain up to 4 bytes and if buffer have more then 4 bytes
+                        # and still can not decode it we can just ignore some bytes
+                        return buffer.decode(errors='ignore')
+
         try:
-            with open(output_filename, 'w') as output_file:
+            with open(output_filename, 'w', encoding='utf8') as output_file:
                 while True:
                     if self.interactive:
-                        out = await input_stream.read(1)
+                        output = await read_interactive_stream()
                     else:
-                        out = await input_stream.readline()
-                    if not out:
+                        output = await read_stream()
+                    if not output:
                         break
-                    output = prepare_for_print(out)
-                    output_file.write(output)
+                    output_noescape = delete_ansi_escape(output)
+                    # Always remove escape sequences when writing the build log.
+                    output_file.write(output_noescape)
+                    # If idf.py output is redirected and the output stream is not a TTY,
+                    # strip the escape sequences as well.
+                    # (There shouldn't be any, but just in case.)
+                    if not output_stream.isatty():
+                        output = output_noescape
 
-                    # print output in progression way but only the progression related (that started with '[') and if verbose flag is not set
                     if self.force_progression and output[0] == '[' and '-v' not in self.args and output_stream.isatty():
+                        # print output in progression way but only the progression related (that started with '[') and if verbose flag is not set
                         print_progression(output)
                     else:
                         output_stream.write(output)
@@ -282,10 +305,16 @@ def run_target(target_name: str, args: 'PropertyDict', env: Optional[Dict]=None,
         env = {}
 
     generator_cmd = GENERATORS[args.generator]['command']
-    env.update(GENERATORS[args.generator]['envvar'])
 
     if args.verbose:
         generator_cmd += [GENERATORS[args.generator]['verbose_flag']]
+
+    # By default, GNU Make and Ninja strip away color escape sequences when they see that their stdout is redirected.
+    # If idf.py's stdout is not redirected, the final output is a TTY, so we can tell Make/Ninja to disable stripping
+    # of color escape sequences. (Requires Ninja v1.9.0 or later.)
+    if sys.stdout.isatty():
+        if 'CLICOLOR_FORCE' not in env:
+            env['CLICOLOR_FORCE'] = '1'
 
     RunTool(generator_cmd[0], generator_cmd + [target_name], args.build_dir, env, custom_error_handler, hints=not args.no_hints,
             force_progression=force_progression, interactive=interactive)()

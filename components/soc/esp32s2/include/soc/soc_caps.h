@@ -63,6 +63,8 @@
 #define SOC_I2S_SUPPORTED               1
 #define SOC_RMT_SUPPORTED               1
 #define SOC_SDM_SUPPORTED               1
+#define SOC_LEDC_SUPPORTED              1
+#define SOC_I2C_SUPPORTED               1
 #define SOC_SYSTIMER_SUPPORTED          1
 #define SOC_SUPPORT_COEXISTENCE         0
 #define SOC_AES_SUPPORTED               1
@@ -112,6 +114,9 @@
 
 /*-------------------------- BROWNOUT CAPS -----------------------------------*/
 #define SOC_BROWNOUT_RESET_SUPPORTED 1
+
+/*-------------------------- CACHE/MMU CAPS ----------------------------------*/
+#define SOC_MMU_LINEAR_ADDRESS_REGION_NUM        6
 
 /*-------------------------- CP-DMA CAPS -------------------------------------*/
 #define SOC_CP_DMA_MAX_BUFFER_SIZE (4095) /*!< Maximum size of the buffer that can be attached to descriptor */

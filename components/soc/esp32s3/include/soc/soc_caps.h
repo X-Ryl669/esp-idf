@@ -52,6 +52,8 @@
 #define SOC_I2S_SUPPORTED               1
 #define SOC_RMT_SUPPORTED               1
 #define SOC_SDM_SUPPORTED               1
+#define SOC_LEDC_SUPPORTED              1
+#define SOC_I2C_SUPPORTED               1
 #define SOC_SYSTIMER_SUPPORTED          1
 #define SOC_SUPPORT_COEXISTENCE         1
 #define SOC_TEMP_SENSOR_SUPPORTED       1
@@ -109,6 +111,9 @@
 
 /*-------------------------- BROWNOUT CAPS -----------------------------------*/
 #define SOC_BROWNOUT_RESET_SUPPORTED 1
+
+/*-------------------------- CACHE/MMU CAPS ----------------------------------*/
+#define SOC_MMU_LINEAR_ADDRESS_REGION_NUM       (1U)
 
 /*-------------------------- CPU CAPS ----------------------------------------*/
 #define SOC_CPU_CORES_NUM               2
@@ -235,6 +240,7 @@
 #define SOC_LCD_RGB_PANELS              (1U) /*!< Support one RGB LCD panel */
 #define SOC_LCD_I80_BUS_WIDTH           (16) /*!< Intel 8080 bus width */
 #define SOC_LCD_RGB_DATA_WIDTH          (16) /*!< Number of LCD data lines */
+#define SOC_LCD_SUPPORT_RGB_YUV_CONV    (1)  /*!< Support color format conversion between RGB and YUV */
 
 /*-------------------------- RTC CAPS --------------------------------------*/
 #define SOC_RTC_CNTL_CPU_PD_DMA_BUS_WIDTH       (128)

@@ -1112,11 +1112,6 @@ esp_err_t wifi_prov_mgr_is_provisioned(bool *provisioned)
 
     *provisioned = false;
 
-    if (!prov_ctx_lock) {
-        ESP_LOGE(TAG, "Provisioning manager not initialized");
-        return ESP_ERR_INVALID_STATE;
-    }
-
     /* Get Wi-Fi Station configuration */
     wifi_config_t wifi_cfg;
     if (esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg) != ESP_OK) {
@@ -1349,6 +1344,7 @@ void wifi_prov_mgr_deinit(void)
         ESP_LOGD(TAG, "Manager already de-initialized");
         RELEASE_LOCK(prov_ctx_lock);
         vSemaphoreDelete(prov_ctx_lock);
+        prov_ctx_lock = NULL;
         return;
     }
 
@@ -1401,6 +1397,7 @@ void wifi_prov_mgr_deinit(void)
     }
 
     vSemaphoreDelete(prov_ctx_lock);
+    prov_ctx_lock = NULL;
 }
 
 esp_err_t wifi_prov_mgr_start_provisioning(wifi_prov_security_t security, const void *wifi_prov_sec_params,

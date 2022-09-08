@@ -91,6 +91,14 @@ config SOC_SDM_SUPPORTED
     bool
     default y
 
+config SOC_LEDC_SUPPORTED
+    bool
+    default y
+
+config SOC_I2C_SUPPORTED
+    bool
+    default y
+
 config SOC_SUPPORT_COEXISTENCE
     bool
     default y
@@ -206,6 +214,10 @@ config SOC_RTC_SLOW_CLOCK_SUPPORT_8MD256
 config SOC_SHARED_IDCACHE_SUPPORTED
     bool
     default y
+
+config SOC_MMU_LINEAR_ADDRESS_REGION_NUM
+    int
+    default 5
 
 config SOC_CPU_CORES_NUM
     int
@@ -698,10 +710,6 @@ config SOC_SDMMC_USE_IOMUX
 config SOC_SDMMC_NUM_SLOTS
     int
     default 2
-
-config SOC_BLE_DONT_UPDATE_OWN_RPA
-    bool
-    default y
 
 config SOC_WIFI_HW_TSF
     bool
