@@ -43,9 +43,10 @@ void app_main(void)
     rtc_gpio_init(CONFIG_EXAMPLE_PULSE_COUNT_PIN);
     rtc_gpio_set_direction(CONFIG_EXAMPLE_PULSE_COUNT_PIN, RTC_GPIO_MODE_INPUT_OUTPUT);
     rtc_gpio_pulldown_dis(CONFIG_EXAMPLE_PULSE_COUNT_PIN);
-    rtc_gpio_pullup_dis(CONFIG_EXAMPLE_PULSE_COUNT_PIN);
+    rtc_gpio_pullup_en(CONFIG_EXAMPLE_PULSE_COUNT_PIN);
 
     printf("ULP will wake up processor after every %d pulses\n", CONFIG_EXAMPLE_PULSE_COUNT_WAKEUP_LIMIT);
+//	while (true) {vTaskDelay(pdMS_TO_TICKS(1000)); printf("Boo\n");}
 
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
     /* not a wakeup from ULP, load the firmware */
@@ -60,6 +61,7 @@ void app_main(void)
     /* Go back to sleep, only the ULP will run */
     printf("Entering in deep sleep\n\n");
 
+
     /* Small delay to ensure the messages are printed */
     ESP_ERROR_CHECK( esp_sleep_enable_ulp_wakeup());
 
@@ -68,9 +70,9 @@ void app_main(void)
 
 static void init_ulp_program(void)
 {
-    lp_core_uart_cfg_t uart_cfg = LP_CORE_UART_DEFAULT_CONFIG();
+//    lp_core_uart_cfg_t uart_cfg = LP_CORE_UART_DEFAULT_CONFIG();
 
-    ESP_ERROR_CHECK(lp_core_uart_init(&uart_cfg));
+//    ESP_ERROR_CHECK(lp_core_uart_init(&uart_cfg));
 
     esp_err_t err = ulp_lp_core_load_binary(ulp_main_bin_start, (ulp_main_bin_end - ulp_main_bin_start));
     ESP_ERROR_CHECK(err);

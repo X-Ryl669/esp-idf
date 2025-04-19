@@ -32,7 +32,7 @@ void LP_CORE_ISR_ATTR ulp_lp_core_lp_io_intr_handler(void)
     }
 
     if (pulse_count % CONFIG_EXAMPLE_PULSE_COUNT_WAKEUP_LIMIT == 0) {
-        lp_core_printf("Pulse count: %d, wake-up main CPU\n", pulse_count);
+//        lp_core_printf("Pulse count: %d, wake-up main CPU\n", pulse_count);
         ulp_lp_core_wakeup_main_processor();
     }
 
@@ -42,7 +42,7 @@ void LP_CORE_ISR_ATTR ulp_lp_core_lp_io_intr_handler(void)
 
 int main (void)
 {
-    lp_core_printf("LP Core pulse counter started\n");
+//    lp_core_printf("LP Core pulse counter started\n");
     ulp_lp_core_intr_enable();
     ulp_lp_core_gpio_intr_enable(CONFIG_EXAMPLE_PULSE_COUNT_PIN, LP_IO_INTR_POSEDGE);
 
@@ -56,7 +56,8 @@ int main (void)
         ulp_lp_core_gpio_set_level(CONFIG_EXAMPLE_PULSE_COUNT_PIN, 0);
 #else
         /* Put CPU into a wait state to reduce power consumption while waiting for pulses */
-        ulp_lp_core_wait_for_intr();
+//        ulp_lp_core_wait_for_intr();
+        ulp_lp_core_halt();
 #endif //CONFIG_EXAMPLE_PULSE_COUNT_SIMULATE
     }
 
