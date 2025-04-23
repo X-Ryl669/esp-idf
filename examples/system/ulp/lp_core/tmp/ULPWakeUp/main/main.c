@@ -6,6 +6,7 @@ GPIO7 - button input used for IOC
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "esp_sleep.h"
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
@@ -128,7 +129,28 @@ static void SHTC3()
 	writeCommand(0xB098);
 }
 
+void dumpULPLog()
+{
+#define LP_CORE_LL_WAKEUP_SOURCE_HP_CPU    BIT(0) // Started by HP core (1 single wakeup)
+#define LP_CORE_LL_WAKEUP_SOURCE_LP_UART   BIT(1) // Enable wake-up by a certain number of LP UART RX pulses
+#define LP_CORE_LL_WAKEUP_SOURCE_LP_IO     BIT(2) // Enable wake-up by LP IO interrupt
+#define LP_CORE_LL_WAKEUP_SOURCE_ETM       BIT(3) // Enable wake-up by ETM event
+#define LP_CORE_LL_WAKEUP_SOURCE_LP_TIMER  BIT(4) // Enable wake-up by LP timer
 
+    printf("\n\n====== Log Array ========\n");
+	for (uint32_t i = 0; i < ulp_logIndex; i+=3)
+	{
+	    
+		printf("LPcore wake up cause: (%lu) = %lu %s%s%s%s%s\n", i, ulp_logArray[i],
+			(ulp_logArray[i] & LP_CORE_LL_WAKEUP_SOURCE_HP_CPU) ? "HP_CPU:" : "",
+			(ulp_logArray[i] & LP_CORE_LL_WAKEUP_SOURCE_LP_UART) ? "LP_UART:" : "",
+			(ulp_logArray[i] & LP_CORE_LL_WAKEUP_SOURCE_LP_IO) ? "LP_IO:" : "",
+			(ulp_logArray[i] & LP_CORE_LL_WAKEUP_SOURCE_ETM) ? "ETM:" : "",
+			(ulp_logArray[i] & LP_CORE_LL_WAKEUP_SOURCE_LP_TIMER) ? "LP_TIMER" : ""
+			);
+		printf("LPcore cycle count: 0x%08lX%08lX\n", ulp_logArray[i+1], ulp_logArray[i+2]);
+	}
+}
 
 
 void app_main(void)
@@ -147,6 +169,13 @@ void app_main(void)
 
     if (cause == ESP_SLEEP_WAKEUP_ULP) {
             printf("ULP woke up the main CPU! \r\n");
+            while(true)
+            {
+            	dumpULPLog();
+           		vTaskDelay(pdMS_TO_TICKS(1000));
+
+            }
+            // Start logging the 
         }
     else {
         printf("WakeUp %d, initializing ULP! \r\n", cause);
@@ -168,6 +197,10 @@ static void init_ulp_program(void)
     esp_err_t err = ulp_lp_core_load_binary(ulp_main_bin_start, (ulp_main_bin_end - ulp_main_bin_start));
     ESP_ERROR_CHECK(err);
 
+	// Initialize the log array
+	memset(&ulp_logArray, 0, 256*sizeof(*ulp_logArray));
+	ulp_logIndex = 0;
+	
     /* Start the program */
     ulp_lp_core_cfg_t cfg = {
         .wakeup_source = ULP_LP_CORE_WAKEUP_SOURCE_LP_TIMER | ULP_LP_CORE_WAKEUP_SOURCE_LP_IO,
