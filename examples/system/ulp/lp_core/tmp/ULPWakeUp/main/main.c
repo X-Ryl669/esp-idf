@@ -159,12 +159,12 @@ void app_main(void)
 	vTaskDelay(pdMS_TO_TICKS(1000));
 
     /* Initialize selected GPIO as RTC IO, enable input, disable pullup and pulldown */
-    rtc_gpio_init(INPUT_PIN);
+/*    rtc_gpio_init(INPUT_PIN);
     rtc_gpio_set_direction(INPUT_PIN, RTC_GPIO_MODE_INPUT_ONLY);
     rtc_gpio_pulldown_dis(INPUT_PIN);
     rtc_gpio_pullup_en(INPUT_PIN);
 	rtc_gpio_wakeup_enable(INPUT_PIN, GPIO_INTR_NEGEDGE);
-
+*/
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
 
     if (cause == ESP_SLEEP_WAKEUP_ULP) {
@@ -203,7 +203,7 @@ static void init_ulp_program(void)
 	
     /* Start the program */
     ulp_lp_core_cfg_t cfg = {
-        .wakeup_source = ULP_LP_CORE_WAKEUP_SOURCE_LP_TIMER | ULP_LP_CORE_WAKEUP_SOURCE_LP_IO,
+        .wakeup_source = ULP_LP_CORE_WAKEUP_SOURCE_LP_TIMER, // | ULP_LP_CORE_WAKEUP_SOURCE_LP_IO,
         .lp_timer_sleep_duration_us = 3000000,
     };
 

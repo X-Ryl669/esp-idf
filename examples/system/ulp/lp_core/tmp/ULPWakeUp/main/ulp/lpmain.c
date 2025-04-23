@@ -34,6 +34,14 @@ void LP_CORE_ISR_ATTR ulp_lp_core_lp_timer_intr_handler(void)
 
 int main (void)
 {
+	if (logIndex == 0)
+	{	// Program the IO for next wakeup
+		ulp_lp_core_gpio_init(3);
+		ulp_lp_core_gpio_input_enable(3);
+		ulp_lp_core_gpio_pullup_enable(3);
+//		ulp_lp_core_gpio_intr_enable(3, LP_IO_INTR_NEGEDGE);
+		rtcio_ll_wakeup_enable(3, LP_IO_INTR_NEGEDGE);
+	}
     // Remember the wake cause for this run
     ulp_lp_core_update_wakeup_cause();
     logArray[logIndex++] = ulp_lp_core_get_wakeup_cause();
